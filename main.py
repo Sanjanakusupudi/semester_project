@@ -1,38 +1,32 @@
-import pandas as pd
 import numpy as np
-from sklearn.preprocessing import MinMaxScaler
 from tensorflow.keras.models import load_model
 from sklearn.metrics import accuracy_score, classification_report
-import joblib
+from preprocessor import preprocess_data  # Import the preprocessor function
 
-# Step 1: Load the test data from CSV
+# File paths
 test_data_file = '/Users/sanjanakusupudi/Downloads/Pedestrian Crossing at unsignalized intersections/Data.csv'
-test_data_df = pd.read_csv(test_data_file)
-
-# Step 2: Split features and labels
-X_test = test_data_df.iloc[:, :-1].values
-y_test = test_data_df.iloc[:, -1].values
-
-# Step 3: Preprocess the test data
-# Load the scaler
 scaler_path = '/Users/sanjanakusupudi/Downloads/Pedestrian Crossing at unsignalized intersections/scaler.pkl'
-scaler = joblib.load(scaler_path)
-
-# Scale the test data
-X_test_scaled = scaler.transform(X_test)
-
-# Step 4: Load the saved model
 model_path = 'my_trained_model.h5'
+target_column = 'Safety perception (y)'  # Set to None if you don't need labels for prediction
+
+# Step 1: Preprocess the test data
+# Note: If `target_column` is None, `preprocess_data` should be modified to handle unlabeled test data
+X_test, y_test = preprocess_data(test_data_file, target_column, scaler_path)
+
+# Step 2: Load the saved model
 model = load_model(model_path)
 
-# Step 5: Make predictions on the test set
-predictions = model.predict(X_test_scaled)
+# Step 3: Make predictions on the test set
+predictions = model.predict(X_test)
 predicted_labels = np.argmax(predictions, axis=1)
 
-# Step 6: Evaluate the model
-accuracy = accuracy_score(y_test, predicted_labels)
-print(f'Test accuracy: {accuracy}')
+# Step 4: Evaluate the model
+if y_test is not None:
+    accuracy = accuracy_score(y_test, predicted_labels)
+    print(f'Test accuracy: {accuracy}')
 
-report = classification_report(y_test, predicted_labels)
-print('Classification Report:')
-print(report)
+    report = classification_report(y_test, predicted_labels)
+    print('Classification Report:')
+    print(report)
+else:
+    print("Test predictions generated but no labels available for evaluation.")
