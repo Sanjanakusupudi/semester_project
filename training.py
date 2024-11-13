@@ -16,7 +16,7 @@ target_column = 'Safety perception (y)'
 X, y = preprocess_data(file_path, target_column, scaler_path)
 
 # Ensure labels are zero-indexed (if needed)
-y = y - 1
+# y = y - 1
 
 # Calculate the number of unique classes
 num_classes = len(y.unique())
